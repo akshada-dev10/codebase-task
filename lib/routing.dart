@@ -1,3 +1,4 @@
+import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:codebase_task/presentation/feature/user_detail_screen.dart';
 import 'package:codebase_task/presentation/feature/user_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +19,8 @@ class AppRouting {
             name: 'userDetails',
             builder: (BuildContext context, GoRouterState state) {
 
-              final userData = state.extra as Map<String, dynamic>? ?? {};
-
-              return UserDetailScreen(
-
-                userData: userData,
-              );
+              final user = state.extra as User?;
+              return UserDetailScreen(userData: user);
             },
           ),
         ],

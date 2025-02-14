@@ -1,17 +1,23 @@
-import 'package:codebase_task/data/source/local/user_data_usecase.dart';
+import 'dart:async';
+import 'package:codebase_task/data/source/local/user_data_source.dart';
 import 'package:codebase_task/domain/entity/user_entities.dart';
-import 'package:codebase_task/domain/repository/get_user_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:codebase_task/domain/usecases/user_usecase.dart';
 
-class UserNotifier extends ChangeNotifier {
-  final UserRepository userRepository;
+
+class UserViewModel {
+  final GetUsersUseCase getUsersUseCase;
   final UserDataUseCase userDataUseCase;
   List<User> users = [];
   int _page = 1;
   bool isFetchingMore = false;
   bool hasMoreData = true;
+  final StreamController<List<User>> _userStreamController = StreamController.broadcast();
 
-  UserNotifier(this.userRepository,this.userDataUseCase);
+  Stream<List<User>> get userStream => _userStreamController.stream;
+
+  UserViewModel(this.getUsersUseCase, this.userDataUseCase) {
+    fetchUsers();
+  }
 
   Future<void> fetchUsers({bool reset = false}) async {
     if (reset) {
@@ -25,8 +31,7 @@ class UserNotifier extends ChangeNotifier {
       users = await userDataUseCase.getUsers();
     }
 
-    final newUsers = await userRepository.getUsers(_page);
-
+    final newUsers = await getUsersUseCase.execute(_page);
     final uniqueUsers = newUsers.where((user) => !users.any((existing) => existing.id == user.id)).toList();
 
     if (reset) {
@@ -36,9 +41,8 @@ class UserNotifier extends ChangeNotifier {
     }
 
     await userDataUseCase.saveUsers(users);
-
     hasMoreData = uniqueUsers.isNotEmpty;
-    notifyListeners();
+    _userStreamController.add(users);
   }
 
   Future<void> loadMore() async {
@@ -48,8 +52,7 @@ class UserNotifier extends ChangeNotifier {
     _page++;
 
     try {
-      final newUsers = await userRepository.getUsers(_page);
-
+      final newUsers = await getUsersUseCase.execute(_page);
       final uniqueUsers = newUsers.where((user) => !users.any((existing) => existing.id == user.id)).toList();
 
       if (uniqueUsers.isEmpty) {
@@ -57,14 +60,14 @@ class UserNotifier extends ChangeNotifier {
       } else {
         users.addAll(uniqueUsers);
         await userDataUseCase.saveUsers(users);
+        _userStreamController.add(users);
       }
-
-      notifyListeners();
     } finally {
       isFetchingMore = false;
     }
   }
+
+  void dispose() {
+    _userStreamController.close();
+  }
 }
-
-
-

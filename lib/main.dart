@@ -18,6 +18,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: AppRouting.router,
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
     );
   }
 }

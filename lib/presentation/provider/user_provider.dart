@@ -1,37 +1,43 @@
-import 'package:codebase_task/data/local_db.dart';
-import 'package:codebase_task/di/user_usecase.dart';
-import 'package:codebase_task/domain/models/user_model.dart';
+import 'package:codebase_task/data/source/local/user_data_usecase.dart';
+import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:codebase_task/domain/repository/get_user_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserNotifier extends ChangeNotifier {
   final UserRepository userRepository;
+  final UserDataUseCase userDataUseCase;
   List<User> users = [];
   int _page = 1;
   bool isFetchingMore = false;
   bool hasMoreData = true;
 
-  UserNotifier(this.userRepository);
+  UserNotifier(this.userRepository,this.userDataUseCase);
 
   Future<void> fetchUsers({bool reset = false}) async {
     if (reset) {
       _page = 1;
       users.clear();
+      await userDataUseCase.clearUsers();
       hasMoreData = true;
     }
 
-    if (!reset) {
-      users = await LocalStorage.getCachedUsers();
-      notifyListeners();
+    if (users.isEmpty) {
+      users = await userDataUseCase.getUsers();
     }
 
     final newUsers = await userRepository.getUsers(_page);
-    users = newUsers;
 
-    await LocalStorage.cacheUsers(users);
+    final uniqueUsers = newUsers.where((user) => !users.any((existing) => existing.id == user.id)).toList();
 
-    hasMoreData = newUsers.isNotEmpty;
+    if (reset) {
+      users = uniqueUsers;
+    } else {
+      users.addAll(uniqueUsers);
+    }
+
+    await userDataUseCase.saveUsers(users);
+
+    hasMoreData = uniqueUsers.isNotEmpty;
     notifyListeners();
   }
 
@@ -43,12 +49,16 @@ class UserNotifier extends ChangeNotifier {
 
     try {
       final newUsers = await userRepository.getUsers(_page);
-      if (newUsers.isEmpty) {
+
+      final uniqueUsers = newUsers.where((user) => !users.any((existing) => existing.id == user.id)).toList();
+
+      if (uniqueUsers.isEmpty) {
         hasMoreData = false;
       } else {
-        users.addAll(newUsers);
+        users.addAll(uniqueUsers);
+        await userDataUseCase.saveUsers(users);
       }
-      await LocalStorage.cacheUsers(users);
+
       notifyListeners();
     } finally {
       isFetchingMore = false;
@@ -56,6 +66,5 @@ class UserNotifier extends ChangeNotifier {
   }
 }
 
-final userProvider = ChangeNotifierProvider(
-      (ref) => UserNotifier(ref.read(userRepositoryProvider)),
-);
+
+

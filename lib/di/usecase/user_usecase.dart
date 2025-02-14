@@ -1,6 +1,9 @@
 
+import 'package:codebase_task/data/repository/user_repository_implementation.dart';
+import 'package:codebase_task/di/usecase/user_usercase_db.dart';
 import 'package:codebase_task/domain/repository/get_user_repository.dart';
-import 'package:codebase_task/domain/usecase.dart';
+import 'package:codebase_task/domain/usecases/user_usecase.dart';
+import 'package:codebase_task/presentation/provider/user_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,5 +23,13 @@ final dioProvider = Provider<Dio>((ref) {
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  return UserRepository(dio);
+  final localStorageDataSource = ref.watch(localStorageDataSourceProvider);
+  return UserRepositoryImplementation(dio, localStorageDataSource);
 });
+
+final userProvider = ChangeNotifierProvider(
+      (ref) => UserNotifier(
+    ref.read(userRepositoryProvider),
+    ref.read(userDataUseCaseProvider),
+  ),
+);

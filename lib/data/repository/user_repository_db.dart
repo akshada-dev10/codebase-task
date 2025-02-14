@@ -1,19 +1,25 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:codebase_task/domain/models/user_model.dart';
+import 'package:codebase_task/domain/entity/user_entities.dart';
 
-class LocalStorage {
+abstract class LocalStorageDataSource {
+  Future<void> cacheUsers(List<User> users);
+  Future<List<User>> getCachedUsers();
+  Future<void> clearCache();
+}
+
+class LocalStorageDataSourceImpl implements LocalStorageDataSource {
   static const String _usersKey = "cached_users";
 
-  /// Save list of users to SharedPreferences
-  static Future<void> cacheUsers(List<User> users) async {
+  @override
+  Future<void> cacheUsers(List<User> users) async {
     final prefs = await SharedPreferences.getInstance();
     String jsonString = jsonEncode(users.map((user) => user.toJson()).toList());
     await prefs.setString(_usersKey, jsonString);
   }
 
-  /// Get list of users from SharedPreferences
-  static Future<List<User>> getCachedUsers() async {
+  @override
+  Future<List<User>> getCachedUsers() async {
     final prefs = await SharedPreferences.getInstance();
     String? jsonString = prefs.getString(_usersKey);
 
@@ -25,9 +31,13 @@ class LocalStorage {
     return jsonList.map((user) => User.fromJson(user)).toList();
   }
 
-  /// Clear cached users
-  static Future<void> clearCache() async {
+  @override
+  Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_usersKey);
   }
 }
+
+
+
+

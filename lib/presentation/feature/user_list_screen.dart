@@ -1,5 +1,5 @@
-import 'package:codebase_task/presentation/provider/user_provider.dart';
-import 'package:codebase_task/domain/models/user_model.dart';
+import 'package:codebase_task/di/usecase/user_usecase.dart';
+import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +25,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     _scrollController.addListener(_onScroll);
   }
 
+  /// Reading the provider for scrolling scenario and updating the widget for pagination
   void _onScroll() {
     final userNotifier = ref.read(userProvider);
     if (_scrollController.position.pixels >=

@@ -1,4 +1,4 @@
-import 'package:codebase_task/domain/models/user_model.dart';
+import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:codebase_task/domain/repository/get_user_repository.dart';
 
 class GetUsersUseCase {

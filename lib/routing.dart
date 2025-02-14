@@ -10,23 +10,19 @@ class AppRouting {
       GoRoute(
         path: '/userList',
         builder: (BuildContext context, GoRouterState state) {
-          return const UserListScreen();
+          return  UserListScreen();
         },
         routes: <RouteBase>[
           GoRoute(
-            path: 'userDetails/:firstName/:lastName/:imageUrl/:email',
+            path: 'userDetails',
             name: 'userDetails',
             builder: (BuildContext context, GoRouterState state) {
-              final firstName = state.pathParameters['firstName'] ?? 'Unknown';
-              final lastName = state.pathParameters['lastName'] ?? 'User';
-              final imageUrl = Uri.decodeComponent(state.pathParameters['imageUrl'] ?? '');
-              final email = state.pathParameters['email'] ?? 'test@g.com';
+
+              final userData = state.extra as Map<String, dynamic>? ?? {};
 
               return UserDetailScreen(
-                firstName: firstName,
-                lastName: lastName,
-                imageUrl: imageUrl,
-                email: email,
+
+                userData: userData,
               );
             },
           ),

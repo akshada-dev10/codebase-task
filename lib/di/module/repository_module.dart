@@ -1,6 +1,7 @@
 
+import 'package:codebase_task/data/repository/user_local_repository.dart';
 import 'package:codebase_task/data/repository/user_repository_implementation.dart';
-import 'package:codebase_task/di/usecase/user_usercase_db.dart';
+import 'package:codebase_task/data/source/local/user_data_usecase.dart';
 import 'package:codebase_task/domain/repository/get_user_repository.dart';
 import 'package:codebase_task/domain/usecases/user_usecase.dart';
 import 'package:codebase_task/presentation/provider/user_provider.dart';
@@ -33,3 +34,12 @@ final userProvider = ChangeNotifierProvider(
     ref.read(userDataUseCaseProvider),
   ),
 );
+
+
+final localStorageDataSourceProvider = Provider<LocalStorageDataSource>(
+      (ref) => LocalStorageDataSourceImpl(),
+);
+final userDataUseCaseProvider = Provider<UserDataUseCase>(
+      (ref) => UserDataUseCase(ref.read(localStorageDataSourceProvider)),
+);
+

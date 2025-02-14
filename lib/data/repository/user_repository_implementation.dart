@@ -1,4 +1,4 @@
-import 'package:codebase_task/data/repository/user_repository_db.dart';
+import 'package:codebase_task/data/repository/user_local_repository.dart';
 import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:codebase_task/domain/repository/get_user_repository.dart';
 import 'package:dio/dio.dart';

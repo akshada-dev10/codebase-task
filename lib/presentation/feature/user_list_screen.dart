@@ -1,4 +1,4 @@
-import 'package:codebase_task/di/usecase/user_usecase.dart';
+import 'package:codebase_task/di/module/repository_module.dart';
 import 'package:codebase_task/domain/entity/user_entities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,12 +100,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                               onTap: () {
                                 context.pushNamed(
                                   'userDetails',
-                                  pathParameters: {
-                                    'firstName': user.firstName!,
-                                    'lastName': user.lastName!,
-                                    'imageUrl': user.profilePicture!,
-                                    'email': user.email!
-                                  },
+                                  extra: {'userData': users[index]}, // Pass the whole User object inside a map
                                 );
                               },
                               contentPadding: const EdgeInsets.symmetric(
